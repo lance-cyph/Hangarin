@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangarin | Task Manager</title>
+    <!-- Bootstrap 5 CSS via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">🚀 Hangarin To-Do</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        
+        <!-- Header & Create Button -->
+        <div class="row mb-3 align-items-center">
+            <div class="col">
+                <h2 class="fw-bold text-secondary mb-0">My Tasks</h2>
+            </div>
+            <div class="col text-end">
+                <a href="{% url 'task_create' %}" class="btn btn-primary fw-bold">➕ Create New Task</a>
+            </div>
+        </div>
+        <hr>
+
+        <!-- Filter & Search Bar -->
+        <div class="row mb-4">
+            <div class="col">
+                <form method="GET" action="{% url 'task_list' %}" class="row g-2 align-items-center bg-white p-3 shadow-sm rounded border">
+                    
+                    <!-- Search Input -->
+                    <div class="col-md-4">
+                        <input type="text" name="q" class="form-control" placeholder="Search titles or descriptions..." value="{{ current_search }}">
+                    </div>
+                    
+                    <!-- Category Dropdown -->
+                    <div class="col-md-3">
+                        <select name="category" class="form-select">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if current_category == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Status Dropdown -->
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">All Statuses</option>
+                            {% for status in statuses %}
+                                <option value="{{ status }}" {% if current_status == status %}selected{% endif %}>
+                                    {{ status }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                        <a href="{% url 'task_list' %}" class="btn btn-outline-secondary w-100">Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Task Grid -->
+        <div class="row">
+            {% for task in tasks %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <!-- Status Badge -->
+                        <div class="mb-2">
+                            {% if task.status == 'Pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif task.status == 'In Progress' %}
+                                <span class="badge bg-info text-dark">In Progress</span>
+                            {% elif task.status == 'Completed' %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ task.status }}</span>
+                            {% endif %}
+                            
+                            <!-- Priority Badge -->
+                            <span class="badge border border-danger text-danger">{{ task.priority.name }}</span>
+                        </div>
+
+                        <!-- Task Title (Clickable to Detail Page) & Category -->
+                        <h5 class="card-title fw-bold mb-1">
+                            <a href="{% url 'task_detail' task.pk %}" class="text-decoration-none text-dark">
+                                {{ task.title }}
+                            </a>
+                        </h5>
+                        <h6 class="card-subtitle mb-3 text-muted small">📂 {{ task.category.name }}</h6>
+                        
+                        <!-- Description -->
+                        <p class="card-text text-secondary small">{{ task.description|truncatechars:100 }}</p>
+                    </div>
+
+                    <!-- Footer Data (Deadline, Subtasks, Action Buttons) -->
+                    <div class="card-footer bg-white border-top-0 pb-3">
+                        <div class="d-flex justify-content-between align-items-center small mb-3">
+                            <span class="text-danger fw-semibold">
+                                ⏰ {{ task.deadline|date:"M d, Y" }}
+                            </span>
+                            <span class="text-muted">
+                                📝 {{ task.subtask_set.count }} Subtasks
+                            </span>
+                        </div>
+                        
+                        <!-- Mark Completed Button Form -->
+                        {% if task.status != 'Completed' %}
+                        <form action="{% url 'complete_task' task.pk %}" method="POST" class="d-grid mb-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-success fw-bold">
+                                ✔ Mark Completed
+                            </button>
+                        </form>
+                        {% else %}
+                        <div class="d-grid mb-2">
+                            <button class="btn btn-sm btn-success fw-bold" disabled>🎉 Completed</button>
+                        </div>
+                        {% endif %}
+
+                        <!-- Delete Button Form -->
+                        <!-- Button that triggers the Custom Modal -->
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ task.pk }}">
+                                🗑️ Delete Task
+                            </button>
+                        </div>
+                        
+                        <!-- Custom Bootstrap Delete Modal -->
+                        <div class="modal fade" id="deleteModal{{ task.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow">
+                                    
+                                    <!-- CUSTOM TITLE HERE -->
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title fw-bold">⚠️ Warning: Delete Task</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    
+                                    <!-- CUSTOM MESSAGE HERE -->
+                                    <div class="modal-body text-start text-dark mt-2">
+                                        <p>Are you sure you want to permanently delete <strong>"{{ task.title }}"</strong>?</p>
+                                        <p class="text-muted small mb-0">This action cannot be undone.</p>
+                                    </div>
+                                    
+                                    <!-- ACTION BUTTONS -->
+                                    <div class="modal-footer bg-light border-0">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <form action="{% url 'task_delete' task.pk %}" method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger fw-bold">Delete</button>
+                                        </form>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col text-center mt-5">
+                <h4 class="text-muted">No tasks found. Get to work!</h4>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
