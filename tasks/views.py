@@ -133,3 +133,13 @@ def note_delete(request, pk):
         return redirect('task_detail', pk=task_pk)
     
     return redirect('task_list') # Fallback if someone tries to access via GET
+
+def undo_complete_task(request, pk):
+    # Secure POST-only request
+    if request.method == "POST":
+        task = get_object_or_404(Task, pk=pk)
+        task.status = "Pending" # Change this back to your default status
+        task.save()
+    
+    # Redirect the user back to the page they clicked the button from
+    return redirect(request.META.get('HTTP_REFERER', 'task_list'))

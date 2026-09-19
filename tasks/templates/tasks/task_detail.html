@@ -28,6 +28,7 @@
                         <h2 class="fw-bold">{{ task.title }}</h2>
                         <p class="text-danger fw-bold mb-4">Deadline: {{ task.deadline|date:"F d, Y h:i A" }}</p>
                         
+                        <!-- Toggle Complete / Undo Button -->
                         {% if task.status != 'Completed' %}
                         <form action="{% url 'complete_task' task.pk %}" method="POST" class="mt-4">
                             {% csrf_token %}
@@ -35,12 +36,19 @@
                                 Mark as Completed
                             </button>
                         </form>
+                        {% else %}
+                        <form action="{% url 'undo_complete_task' task.pk %}" method="POST" class="mt-4">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger fw-bold px-4 py-2">
+                                Mark as Incomplete
+                            </button>
+                        </form>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Subtasks and Notes -->
+            <!-- Right Column: Notes -->
             <div class="col-lg-4">
                 <!-- Notes List -->
                 <div class="card shadow-sm border-0">
