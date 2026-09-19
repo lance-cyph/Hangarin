@@ -136,16 +136,8 @@ def toggle_subtask(request, pk):
     if request.method == 'POST':
         subtask = get_object_or_404(SubTask, pk=pk)
         
-        print(f"--- Subtask '{subtask.title}' ---")
-        print(f"Status BEFORE click: {subtask.is_completed}")
-        
-        if subtask.is_completed:
-            subtask.is_completed = False
-        else:
-            subtask.is_completed = True
-            
+        subtask.is_completed = not subtask.is_completed
         subtask.save()
-        print(f"Status AFTER click: {subtask.is_completed}")
         
         return redirect('task_detail', pk=subtask.parent_task.pk)
         

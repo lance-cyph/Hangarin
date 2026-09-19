@@ -19,8 +19,8 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(SubTask)
 class SubTaskAdmin(admin.ModelAdmin):
-    list_display = ('title', 'status', 'parent_task_name')
-    list_filter = ('status',)
+    list_display = ('title', 'is_completed', 'parent_task_name')
+    list_filter = ('is_completed',)
     search_fields = ('title',)
 
     def parent_task_name(self, obj):
