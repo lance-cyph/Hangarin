@@ -6,7 +6,12 @@ class TaskForm(forms.ModelForm):
         model = Task
         fields = ['title', 'description', 'deadline', 'status', 'priority', 'category']
         widgets = {
-            'deadline': forms.DateInput(attrs={'type': 'date'}),
+            'title': forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Enter task title...'}),
+            'description': forms.Textarea(attrs={'class': 'form-control mb-3', 'rows': 4, 'placeholder': 'Describe the task...'}),
+            'deadline': forms.DateInput(attrs={'class': 'form-control mb-3', 'type': 'date'}),
+            'status': forms.Select(attrs={'class': 'form-select mb-3'}),
+            'priority': forms.Select(attrs={'class': 'form-select mb-3'}),
+            'category': forms.Select(attrs={'class': 'form-select mb-3'}),
         }
 
 class NoteForm(forms.ModelForm):
