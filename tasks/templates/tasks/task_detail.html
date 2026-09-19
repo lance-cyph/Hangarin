@@ -42,23 +42,6 @@
 
             <!-- Right Column: Subtasks and Notes -->
             <div class="col-lg-4">
-                <!-- Subtasks List -->
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-white fw-bold py-3">
-                        📋 Subtasks
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        {% for subtask in subtasks %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            {{ subtask.title }}
-                            <span class="badge bg-light text-dark border">{{ subtask.status }}</span>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-muted p-3">No subtasks assigned.</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
                 <!-- Notes List -->
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white fw-bold py-3">
