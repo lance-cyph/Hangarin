@@ -23,7 +23,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'task_list' %}">🚀 Hangarin To-Do</a>
+            <a class="navbar-brand fw-bold" href="{% url 'task_list' %}">Hangarin: Task & To-Do Manager</a>
         </div>
     </nav>
 
@@ -127,9 +127,6 @@
                         <div class="d-flex justify-content-between align-items-center small mb-3">
                             <span class="text-danger fw-semibold">
                                 ⏰ {{ task.deadline|date:"M d, Y" }}
-                            </span>
-                            <span class="text-muted">
-                                📝 {{ task.subtask_set.count }} Subtasks
                             </span>
                         </div>
                         

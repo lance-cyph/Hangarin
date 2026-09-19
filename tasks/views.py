@@ -122,3 +122,14 @@ def task_update(request, pk):
         form = TaskForm(instance=task)
     
     return render(request, 'tasks/task_form.html', {'form': form, 'task': task})
+
+def note_delete(request, pk):
+    # Secure POST-only delete to prevent accidental deletions via URL
+    if request.method == 'POST':
+        note = get_object_or_404(Note, pk=pk)
+        task_pk = note.task.pk  # Save parent task ID so we know where to redirect
+        note.delete()
+        # Redirect back to the specific task's detail page
+        return redirect('task_detail', pk=task_pk)
+    
+    return redirect('task_list') # Fallback if someone tries to access via GET
