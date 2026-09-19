@@ -40,7 +40,7 @@
                         <form action="{% url 'undo_complete_task' task.pk %}" method="POST" class="mt-4">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger fw-bold px-4 py-2">
-                                Mark as Incomplete
+                                 Mark as Incomplete
                             </button>
                         </form>
                         {% endif %}
@@ -48,8 +48,63 @@
                 </div>
             </div>
 
-            <!-- Right Column: Notes -->
+            <!-- Right Column: Subtasks & Notes -->
             <div class="col-lg-4">
+                
+                <!-- Subtasks List -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white fw-bold py-3">
+                        Subtasks
+                    </div>
+                    
+                    <!-- Add Subtask Form -->
+                    <div class="card-body bg-light border-bottom p-3">
+                        <form method="POST" class="d-flex gap-2">
+                            {% csrf_token %}
+                            {{ subtask_form.title }}
+                            <button type="submit" name="add_subtask" class="btn btn-sm btn-primary fw-bold text-nowrap">Add</button>
+                        </form>
+                    </div>
+
+                    <!-- Existing Subtasks -->
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for subtask in subtasks %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                
+                                <!-- Subtask Title -->
+                                <div>
+                                    <span class="{% if subtask.is_completed %}text-decoration-line-through text-muted{% endif %}">
+                                        {{ subtask.title }}
+                                    </span>
+                                </div>
+                                
+                                <!-- Subtask Action Buttons -->
+                                <div class="text-nowrap">
+                                    <!-- Toggle Status Form -->
+                                    <form action="{% url 'toggle_subtask' subtask.pk %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-success border-0 fw-bold" title="Toggle Completion">
+                                            {% if subtask.is_completed %}&larr;{% else %}✔{% endif %}
+                                        </button>
+                                    </form>
+
+                                    <!-- Delete Subtask Form -->
+                                    <form action="{% url 'subtask_delete' subtask.pk %}" method="POST" class="d-inline" onsubmit="return confirm('Delete this subtask?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Delete Subtask">
+                                        </button>
+                                    </form>
+                                </div>
+                                
+                            </li>
+                            {% empty %}
+                            <li class="list-group-item text-muted small p-3">No subtasks added yet.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
                 <!-- Notes List -->
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white fw-bold py-3">
@@ -61,7 +116,7 @@
                         <form method="POST">
                             {% csrf_token %}
                             {{ note_form.content }}
-                            <button type="submit" class="btn btn-sm btn-primary mt-2">Add Note</button>
+                            <button type="submit" name="add_note" class="btn btn-sm btn-primary mt-2">Add Note</button>
                         </form>
                     </div>
 
@@ -90,6 +145,7 @@
                         {% endfor %}
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
