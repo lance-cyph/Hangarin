@@ -58,5 +58,5 @@ class Command(BaseCommand):
             SubTask.objects.create(parent_task=task2, title="Get fresh vegetables", is_completed=False)
             SubTask.objects.create(parent_task=task2, title="Cook chicken and rice for Monday", is_completed=False)
 
-        # Output Success Message
+        # Output Success Message:)
         self.stdout.write(self.style.SUCCESS("Successfully populated database with sample data!"))
