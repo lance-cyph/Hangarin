@@ -64,6 +64,28 @@
                     <div class="card-header bg-white fw-bold py-3">
                         📝 Notes
                     </div>
+                    
+                    <!-- Add Note Form -->
+                    <div class="card-body bg-light border-bottom p-3">
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{ note_form.content }}
+                            <button type="submit" class="btn btn-sm btn-primary mt-2">➕ Add Note</button>
+                        </form>
+                    </div>
+
+                    <!-- Existing Notes -->
+                    <div class="card-body p-0">
+                        {% for note in notes %}
+                        <div class="p-3 border-bottom bg-white">
+                            <small class="text-muted d-block mb-1">{{ note.created_at|date:"M d, Y h:i A" }}</small>
+                            <p class="mb-0 small">{{ note.content }}</p>
+                        </div>
+                        {% empty %}
+                        <div class="p-3 text-muted small bg-white">No notes added yet.</div>
+                        {% endfor %}
+                    </div>
+                </div>
                     <div class="card-body p-0">
                         {% for note in notes %}
                         <div class="p-3 border-bottom">

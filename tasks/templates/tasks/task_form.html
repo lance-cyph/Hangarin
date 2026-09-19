@@ -17,7 +17,9 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card shadow-sm border-0 p-4">
-                    <h3 class="fw-bold mb-4">Create New Task</h3>
+                    <h3 class="fw-bold mb-4">
+                        {% if task %}Edit Task: {{ task.title }}{% else %}Create New Task{% endif %}
+                    </h3>
                     <form method="POST">
                         {% csrf_token %}
                         <!-- This securely renders the Django ModelForm with Bootstrap styling -->
