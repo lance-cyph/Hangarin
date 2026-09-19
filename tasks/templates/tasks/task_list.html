@@ -36,7 +36,7 @@
                 <h2 class="fw-bold text-secondary mb-0">My Tasks</h2>
             </div>
             <div class="col text-end">
-                <a href="{% url 'task_create' %}" class="btn btn-primary fw-bold">➕ Create New Task</a>
+                <a href="{% url 'task_create' %}" class="btn btn-primary fw-bold">Create New Task</a>
             </div>
         </div>
         <hr>
@@ -115,7 +115,7 @@
                             </a>
                         </h5>
                         <h6 class="card-subtitle mb-3 text-muted small">
-                            📂 {% if task.category %}{{ task.category.name }}{% else %}No Category{% endif %}
+                            {% if task.category %}{{ task.category.name }}{% else %}No Category{% endif %}
                         </h6>
                         
                         <!-- Description -->
@@ -126,7 +126,7 @@
                     <div class="card-footer bg-white border-top-0 pb-3">
                         <div class="d-flex justify-content-between align-items-center small mb-3">
                             <span class="text-danger fw-semibold">
-                                ⏰ {{ task.deadline|date:"M d, Y" }}
+                                {{ task.deadline|date:"M d, Y" }}
                             </span>
                         </div>
                         
@@ -135,26 +135,26 @@
                         <form action="{% url 'complete_task' task.pk %}" method="POST" class="d-grid mb-2">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-outline-success fw-bold">
-                                ✔ Mark Completed
+                                Mark Completed
                             </button>
                         </form>
                         {% else %}
                         <div class="d-grid mb-2">
-                            <button class="btn btn-sm btn-success fw-bold" disabled>🎉 Completed</button>
+                            <button class="btn btn-sm btn-success fw-bold" disabled>Completed</button>
                         </div>
                         {% endif %}
 
                         <!-- Edit Button -->
                         <div class="d-grid mb-2">
                             <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-primary">
-                                ✏️ Edit Task
+                                Edit Task
                             </a>
                         </div>
 
                         <!-- Button that triggers the Custom Delete Modal -->
                         <div class="d-grid">
                             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ task.pk }}">
-                                🗑️ Delete Task
+                                Delete Task
                             </button>
                         </div>
                     </div>
@@ -167,7 +167,7 @@
                             
                             <!-- Custom Title -->
                             <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title fw-bold">⚠️ Warning: Delete Task</h5>
+                                <h5 class="modal-title fw-bold">Warning: Delete Task</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             
