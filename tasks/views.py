@@ -38,7 +38,6 @@ def task_detail(request, pk):
     subtask_form = SubTaskForm()
     
     if request.method == 'POST':
-        # Check which form was submitted based on the button name
         if 'add_note' in request.POST:
             note_form = NoteForm(request.POST)
             if note_form.is_valid():
@@ -51,7 +50,8 @@ def task_detail(request, pk):
             subtask_form = SubTaskForm(request.POST)
             if subtask_form.is_valid():
                 new_subtask = subtask_form.save(commit=False)
-                new_subtask.task = task
+                # FIXED: Changed from new_subtask.task to new_subtask.parent_task
+                new_subtask.parent_task = task 
                 new_subtask.save()
                 return redirect('task_detail', pk=task.pk)
 
@@ -126,7 +126,7 @@ def note_delete(request, pk):
 def subtask_delete(request, pk):
     if request.method == 'POST':
         subtask = get_object_or_404(SubTask, pk=pk)
-        task_pk = subtask.task.pk  
+        task_pk = subtask.parent_task.pk  
         subtask.delete()
         return redirect('task_detail', pk=task_pk)
     return redirect('task_list')
@@ -135,8 +135,7 @@ def subtask_delete(request, pk):
 def toggle_subtask(request, pk):
     if request.method == 'POST':
         subtask = get_object_or_404(SubTask, pk=pk)
-        # Flip the boolean value between True and False
-        subtask.is_completed = not subtask.is_completed
+        subtask.completed = not subtask.is_completed
         subtask.save()
-        return redirect('task_detail', pk=subtask.task.pk)
+        return redirect('task_detail', pk=subtask.parent_task.pk)
     return redirect('task_list')
