@@ -187,3 +187,6 @@ def login_page(request):
             return redirect('login')
             
     return render(request, 'tasks/login.html')
+
+def offline_page(request):
+    return render(request, 'tasks/offline.html')

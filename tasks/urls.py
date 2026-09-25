@@ -13,4 +13,5 @@ urlpatterns = [
     path('subtask/<int:pk>/delete/', views.subtask_delete, name='subtask_delete'), 
     path('subtask/<int:pk>/toggle/', views.toggle_subtask, name='toggle_subtask'), 
     path('note/<int:pk>/delete/', views.note_delete, name='note_delete'),
+    path('offline/', views.offline_page, name='offline'),
 ]
