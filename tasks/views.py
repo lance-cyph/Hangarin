@@ -2,9 +2,14 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from .models import Task, Category, STATUS_CHOICES, SubTask, Note
 from .forms import TaskForm, NoteForm, SubTaskForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
 
+@login_required
 def task_list(request):
-    tasks = Task.objects.select_related('category', 'priority').prefetch_related('subtask_set', 'note_set').order_by('deadline')
+    # Only fetch tasks belonging to the logged-in user
+    tasks = Task.objects.filter(user=request.user).select_related('category', 'priority').prefetch_related('subtask_set', 'note_set').order_by('deadline')
     
     search_query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
@@ -32,8 +37,10 @@ def task_list(request):
     return render(request, 'tasks/task_list.html', context)
 
 
+@login_required
 def task_detail(request, pk):
-    task = get_object_or_404(Task, pk=pk)
+    # Ensure they can only view their own task
+    task = get_object_or_404(Task, pk=pk, user=request.user)
     note_form = NoteForm()
     subtask_form = SubTaskForm()
     
@@ -50,7 +57,6 @@ def task_detail(request, pk):
             subtask_form = SubTaskForm(request.POST)
             if subtask_form.is_valid():
                 new_subtask = subtask_form.save(commit=False)
-                # FIXED: Changed from new_subtask.task to new_subtask.parent_task
                 new_subtask.parent_task = task 
                 new_subtask.save()
                 return redirect('task_detail', pk=task.pk)
@@ -65,11 +71,15 @@ def task_detail(request, pk):
     return render(request, 'tasks/task_detail.html', context)
 
 
+@login_required
 def task_create(request):
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
-            form.save()
+            # Pause save to assign the logged-in user
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
             return redirect('task_list')
     else:
         form = TaskForm()
@@ -77,8 +87,10 @@ def task_create(request):
     return render(request, 'tasks/task_form.html', {'form': form})
 
 
+@login_required
 def task_update(request, pk):
-    task = get_object_or_404(Task, pk=pk)
+    # Ensure they can only edit their own task
+    task = get_object_or_404(Task, pk=pk, user=request.user)
     
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task)
@@ -91,50 +103,58 @@ def task_update(request, pk):
     return render(request, 'tasks/task_form.html', {'form': form, 'task': task})
 
 
+@login_required
 def complete_task(request, pk):
     if request.method == "POST":
-        task = get_object_or_404(Task, pk=pk)
+        task = get_object_or_404(Task, pk=pk, user=request.user)
         task.status = "Completed"
         task.save()
     return redirect(request.META.get('HTTP_REFERER', 'task_list'))
 
 
+@login_required
 def undo_complete_task(request, pk):
     if request.method == "POST":
-        task = get_object_or_404(Task, pk=pk)
+        task = get_object_or_404(Task, pk=pk, user=request.user)
         task.status = "Pending"
         task.save()
     return redirect(request.META.get('HTTP_REFERER', 'task_list'))
 
 
+@login_required
 def task_delete(request, pk):
     if request.method == 'POST':
-        task = get_object_or_404(Task, pk=pk)
+        task = get_object_or_404(Task, pk=pk, user=request.user)
         task.delete()
     return redirect('task_list')
 
 
+@login_required
 def note_delete(request, pk):
     if request.method == 'POST':
-        note = get_object_or_404(Note, pk=pk)
+        # Ensure the note belongs to a task owned by the user
+        note = get_object_or_404(Note, pk=pk, task__user=request.user)
         task_pk = note.task.pk
         note.delete()
         return redirect('task_detail', pk=task_pk)
     return redirect('task_list')
 
 
+@login_required
 def subtask_delete(request, pk):
     if request.method == 'POST':
-        subtask = get_object_or_404(SubTask, pk=pk)
+        # Ensure the subtask belongs to a task owned by the user
+        subtask = get_object_or_404(SubTask, pk=pk, parent_task__user=request.user)
         task_pk = subtask.parent_task.pk  
         subtask.delete()
         return redirect('task_detail', pk=task_pk)
     return redirect('task_list')
 
 
+@login_required
 def toggle_subtask(request, pk):
     if request.method == 'POST':
-        subtask = get_object_or_404(SubTask, pk=pk)
+        subtask = get_object_or_404(SubTask, pk=pk, parent_task__user=request.user)
         
         subtask.is_completed = not subtask.is_completed
         subtask.save()
@@ -142,3 +162,28 @@ def toggle_subtask(request, pk):
         return redirect('task_detail', pk=subtask.parent_task.pk)
         
     return redirect('task_list')
+
+
+def login_page(request):
+    if request.user.is_authenticated:
+        return redirect('task_list')
+        
+    if request.method == 'POST':
+        u = request.POST.get('username')
+        p = request.POST.get('password')
+        remember = request.POST.get('rememberMe')
+        
+        user = authenticate(request, username=u, password=p)
+        
+        if user is not None:
+            login(request, user)
+            if remember:
+                request.session.set_expiry(1209600)
+            else:
+                request.session.set_expiry(0)
+            return redirect('task_list')
+        else:
+            messages.error(request, "Invalid username or password.")
+            return redirect('login')
+            
+    return render(request, 'tasks/login.html')

@@ -1,0 +1,201 @@
+{% load socialaccount %}
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% progressive_web_app_meta %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangarin | PSUSphere Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            background-image: radial-gradient(circle at center, #ffffff 0%, #f4f6f9 100%);
+        }
+        .login-card {
+            max-width: 420px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .psu-blue-bg { background-color: #003e7e; }
+        .psu-gold-text { color: #fdbb30; }
+        
+        /* Toggle Buttons */
+        .nav-pills .nav-link {
+            color: #6c757d;
+            border-radius: 4px;
+            font-weight: 500;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #e2e8f0;
+            color: #003e7e !important;
+            font-weight: 600;
+        }
+        
+        /* Social Icon */
+        .social-icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #dadce0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .social-icon-btn:hover { background-color: #f8f9fa; }
+        
+        /* Divider Line */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #6c757d;
+            margin: 20px 0;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+    </style>
+</head>
+<body class="vh-100 d-flex justify-content-center align-items-center">
+
+    <div class="card border-0 login-card overflow-hidden">
+        <!-- Header -->
+        <div class="card-header psu-blue-bg text-center py-4 border-0">
+            <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 80px; height: 80px; padding: 4px; overflow: hidden;">
+                <img src="{% static 'Palawan_State_University_seal.png' %}" alt="PSU Logo" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <h4 class="fw-bold text-white mb-0">App Dev Midterm Project:</h4>
+            <p class="psu-gold-text mb-0 small fw-semibold">Hangarin Task & To-Do Manager</p>
+        </div>
+        
+        <div class="card-body px-4 py-4 bg-white">
+            
+            <!-- Login / Register Toggle -->
+            <ul class="nav nav-pills nav-justified mb-4">
+                <li class="nav-item me-1">
+                    <a class="nav-link active border" id="tab-login" onclick="toggleView('login')">LOGIN</a>
+                </li>
+                <li class="nav-item ms-1">
+                    <a class="nav-link bg-light border text-muted" id="tab-register" onclick="toggleView('register')">REGISTER</a>
+                </li>
+            </ul>
+
+            <!-- LOGIN VIEW -->
+            <div id="view-login">
+                <div class="text-center mb-1">
+                    <p class="text-muted small mb-3">Sign in with:</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% provider_login_url 'google' %}" class="social-icon-btn shadow-sm" title="Sign in with PSU Google">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 20px;">
+                        </a>
+                        <a href="{% provider_login_url 'github' %}" class="social-icon-btn shadow-sm" title="Sign in with GitHub">
+                            <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" style="width: 20px;">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="divider small">or:</div>
+
+                <form method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+                                
+                    <!-- Only display actual error messages, ignore allauth success/info popups -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if 'error' in message.tags %}
+                                <div class="alert alert-danger small py-2 text-center">{{ message }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                                
+                    <div class="mb-3">
+                        <!-- Added autocomplete="username" -->
+                        <input type="text" name="username" class="form-control text-secondary" placeholder="Email or Username" autocomplete="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <!-- Added autocomplete="current-password" -->
+                        <input type="password" name="password" class="form-control text-secondary" placeholder="Password" autocomplete="current-password" required>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4 small">
+                        <div class="form-check">
+                            <input type="checkbox" name="rememberMe" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label text-muted" for="rememberMe">Remember me</label>
+                        </div>
+                        <a href="#" class="text-decoration-none">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn w-100 fw-bold py-2 psu-blue-bg text-white border-0 shadow-sm">
+                        SIGN IN
+                    </button>
+                </form>
+            </div>
+
+            <!-- REGISTER VIEW (Initially Hidden) -->
+            <div id="view-register" class="d-none text-center py-3">
+                <h6 class="fw-bold text-secondary mb-3">Student & Developer Access</h6>
+                <p class="text-muted small mb-4">
+                    Accounts are automatically generated upon your first sign-in. 
+                    Use your official <strong>@psu.palawan.edu.ph</strong> email or your GitHub developer account.
+                </p>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{% provider_login_url 'google' %}" class="btn w-100 fw-bold py-2 shadow-sm d-flex justify-content-center align-items-center" style="border: 1px solid #dadce0; color: #3c4043;">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width: 20px; margin-right: 10px;">
+                        Continue with PSU Google
+                    </a>
+                    <a href="{% provider_login_url 'github' %}" class="btn w-100 fw-bold py-2 shadow-sm d-flex justify-content-center align-items-center" style="border: 1px solid #dadce0; color: #3c4043; background-color: #24292e; color: white;">
+                        <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" style="width: 20px; margin-right: 10px; filter: invert(1);">
+                        Continue with GitHub
+                    </a>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="card-footer bg-light text-center border-0 py-3">
+            <small class="text-muted">&copy; 2026 Palawan State University</small>
+        </div>
+    </div>
+
+    <!-- Simple Script to Handle the Toggle -->
+    <script>
+        function toggleView(view) {
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const viewLogin = document.getElementById('view-login');
+            const viewRegister = document.getElementById('view-register');
+
+            if (view === 'register') {
+                tabRegister.classList.add('active');
+                tabRegister.classList.remove('bg-light', 'text-muted');
+                tabLogin.classList.remove('active');
+                tabLogin.classList.add('bg-light', 'text-muted');
+                
+                viewLogin.classList.add('d-none');
+                viewRegister.classList.remove('d-none');
+            } else {
+                tabLogin.classList.add('active');
+                tabLogin.classList.remove('bg-light', 'text-muted');
+                tabRegister.classList.remove('active');
+                tabRegister.classList.add('bg-light', 'text-muted');
+                
+                viewRegister.classList.add('d-none');
+                viewLogin.classList.remove('d-none');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -3,5 +3,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('tasks.urls')), # This routes the homepage to your tasks app
+    path('', include('pwa.urls')),
+    path('', include('tasks.urls')),
+    path('accounts/', include('allauth.urls')),
 ]
