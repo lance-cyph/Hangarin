@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hangarin-cache-v2';
+const CACHE_NAME = 'hangarin-cache-v3';
 const OFFLINE_URL = '/offline/';
 
 self.addEventListener('install', function(e) {
