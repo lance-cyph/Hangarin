@@ -1,41 +1,20 @@
-const CACHE_NAME = 'hangarin-cache-v4'; // Bumped to v4 to trigger the update
-const OFFLINE_URL = '/offline/';
+const CACHE_NAME = 'hangarin-core-v1';
 
-// 1. Install Phase
-self.addEventListener('install', function(e) {
+self.addEventListener('install', function(event) {
     self.skipWaiting();
-    e.waitUntil(
+    event.waitUntil(
         caches.open(CACHE_NAME).then(function(cache) {
             return cache.addAll([
-                OFFLINE_URL,
                 '/static/Palawan_State_University_seal.png',
             ]);
         })
     );
 });
 
-self.addEventListener('activate', function(e) {
-    e.waitUntil(
-        caches.keys().then(function(cacheNames) {
-            return Promise.all(
-                cacheNames.map(function(cacheName) {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(function() {
-            return self.clients.claim();
+self.addEventListener('fetch', function(event) {
+    event.respondWith(
+        caches.match(event.request).then(function(response) {
+            return response || fetch(event.request);
         })
     );
-});
-
-self.addEventListener('fetch', function(e) {
-    if (e.request.mode === 'navigate') {
-        e.respondWith(
-            fetch(e.request).catch(function() {
-                return caches.match(OFFLINE_URL);
-            })
-        );
-    }
 });
