@@ -8,12 +8,18 @@ from django.contrib import messages
 
 @login_required
 def task_list(request):
-    # Only fetch tasks belonging to the logged-in user
-    tasks = Task.objects.filter(user=request.user).select_related('category', 'priority').prefetch_related('subtask_set', 'note_set').order_by('deadline')
+    base_tasks = Task.objects.filter(user=request.user)
+    total_tasks = base_tasks.count()
+    completed_tasks = base_tasks.filter(status='Completed').count()
+    pending_tasks = base_tasks.filter(status='Pending').count()
+    in_progress_tasks = base_tasks.filter(status='In Progress').count()
+
+    tasks = base_tasks.select_related('category', 'priority').prefetch_related('subtask_set', 'note_set').order_by('deadline')
     
     search_query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
     category_filter = request.GET.get('category', '')
+    view_filter = request.GET.get('view', '')
 
     if search_query:
         tasks = tasks.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
@@ -33,9 +39,13 @@ def task_list(request):
         'current_search': search_query,
         'current_status': status_filter,
         'current_category': current_category_id,
+        'current_view': view_filter,
+        'total_tasks': total_tasks,
+        'completed_tasks': completed_tasks,
+        'pending_tasks': pending_tasks,
+        'in_progress_tasks': in_progress_tasks,
     }
     return render(request, 'tasks/task_list.html', context)
-
 
 @login_required
 def task_detail(request, pk):
