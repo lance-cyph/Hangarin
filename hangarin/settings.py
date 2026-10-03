@@ -1,14 +1,12 @@
 import os
 from pathlib import Path
+import sys
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-1%d@6=)29&3hb-lq9v^v@8)-*6y9q3!))4gd6sex#212j=6&^j'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = 'runserver' in sys.argv
 
 ALLOWED_HOSTS = ['lancekeith.pythonanywhere.com', '127.0.0.1']
 
@@ -62,10 +60,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'hangarin.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -73,9 +67,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -98,14 +89,11 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SITE_ID = 1
+SITE_ID = 2
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = 'task_list'
 LOGOUT_REDIRECT_URL = 'task_list'
-
-# Internationalization
-# https://docs.djangoproject.com/en/6.1/topics/i18n/
 
 
 LANGUAGE_CODE = 'en-us'
@@ -117,9 +105,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.1/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -128,9 +113,6 @@ STATICFILES_DIRS = [
 ]
 
 
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-
 MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
@@ -138,6 +120,13 @@ MAILERS = {
 }
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+if 'runserver' in sys.argv:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+else:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# ---------------------------------------------------------------
 
 PWA_APP_NAME = 'Hangarin'
 PWA_APP_DESCRIPTION = "A Progressive Web App version of Hangarin Task & To-Do Manager"
